@@ -26,16 +26,21 @@ function saveQuotes() {
 // -------------------------
 function populateCategories() {
   const categoryFilter = document.getElementById("categoryFilter");
+  categoryFilter.innerHTML = ""; // clear old options
+
   const categories = ["all", ...new Set(quotes.map(q => q.category))];
 
-  categoryFilter.innerHTML = categories
-    .map(cat => `<option value="${cat}">${cat}</option>`)
-    .join("");
+  categories.forEach(cat => {
+    const option = document.createElement("option");
+    option.value = cat;
+    option.textContent = cat;
+    categoryFilter.appendChild(option); // <-- appendChild used here
+  });
 
-  // Restore last selected category from localStorage
   const savedCategory = localStorage.getItem("selectedCategory") || "all";
   categoryFilter.value = savedCategory;
 }
+
 
 // -------------------------
 // DISPLAY RANDOM QUOTE (WITH FILTERING)
