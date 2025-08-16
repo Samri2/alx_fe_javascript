@@ -1,48 +1,46 @@
-// Quotes array: each quote is an object with text + category
+// Step 1: Quotes data structure
 let quotes = [
   { text: "The best way to get started is to quit talking and begin doing.", category: "Motivation" },
-  { text: "Success is not the key to happiness. Happiness is the key to success.", category: "Inspiration" },
-  { text: "Your time is limited, so don’t waste it living someone else’s life.", category: "Life" }
+  { text: "Life is what happens when you're busy making other plans.", category: "Life" },
+  { text: "Your limitation—it’s only your imagination.", category: "Inspiration" }
 ];
 
-// Grab elements from DOM
-const quoteDisplay = document.getElementById("quoteDisplay");
-const quoteCategory = document.getElementById("quoteCategory");
-const newQuoteBtn = document.getElementById("newQuote");
-const addQuoteBtn = document.getElementById("addQuoteBtn");
-
-// Function to show random quote
-function showRandomQuote() {
+// Step 2: Function to display a random quote
+function displayRandomQuote() {
   let randomIndex = Math.floor(Math.random() * quotes.length);
-  let randomQuote = quotes[randomIndex];
-
-  // Update DOM
-  quoteDisplay.textContent = `"${randomQuote.text}"`;
-  quoteCategory.textContent = `— ${randomQuote.category}`;
+  let quoteDisplay = document.getElementById("quoteDisplay");
+  
+  quoteDisplay.innerHTML = `
+    <p><strong>${quotes[randomIndex].category}:</strong> "${quotes[randomIndex].text}"</p>
+  `;
 }
 
-// Function to add new quote
+// Step 3: Function to add a new quote dynamically
 function addQuote() {
-  const newText = document.getElementById("newQuoteText").value.trim();
-  const newCategory = document.getElementById("newQuoteCategory").value.trim();
+  let newQuoteText = document.getElementById("newQuoteText").value.trim();
+  let newQuoteCategory = document.getElementById("newQuoteCategory").value.trim();
 
-  if (newText && newCategory) {
-    // Push new quote into array
-    quotes.push({ text: newText, category: newCategory });
-
-    // Clear inputs
-    document.getElementById("newQuoteText").value = "";
-    document.getElementById("newQuoteCategory").value = "";
-
-    alert("Quote added successfully! 🎉");
-  } else {
-    alert("Please enter both a quote and category.");
+  if (newQuoteText === "" || newQuoteCategory === "") {
+    alert("Please enter both a quote and a category!");
+    return;
   }
+
+  // Add new quote to the array
+  quotes.push({
+    text: newQuoteText,
+    category: newQuoteCategory
+  });
+
+  // Clear inputs
+  document.getElementById("newQuoteText").value = "";
+  document.getElementById("newQuoteCategory").value = "";
+
+  // Show confirmation
+  alert("New quote added successfully!");
 }
 
-// Event Listeners
-newQuoteBtn.addEventListener("click", showRandomQuote);
-addQuoteBtn.addEventListener("click", addQuote);
+// Step 4: Event listener for "Show New Quote" button
+document.getElementById("newQuote").addEventListener("click", displayRandomQuote);
 
-// Show one quote on page load
-showRandomQuote();
+// Show a random quote when the page loads
+window.onload = displayRandomQuote;
