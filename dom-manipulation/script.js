@@ -144,7 +144,9 @@ async function fetchQuotesFromServer() {
   }
 }
 
-async function syncWithServer() {
+
+// New
+async function syncQuotes() {
   const serverQuotes = await fetchQuotesFromServer();
   let updated = false;
 
@@ -202,7 +204,7 @@ document.getElementById("addQuoteBtn").addEventListener("click", createAddQuoteF
 document.getElementById("exportBtn").addEventListener("click", exportToJsonFile);
 document.getElementById("importFile").addEventListener("change", importFromJsonFile);
 document.getElementById("categoryFilter").addEventListener("change", filterQuotes);
-document.getElementById("syncBtn")?.addEventListener("click", syncWithServer);
+document.getElementById("syncBtn")?.addEventListener("click", syncQuotes);
 
 // -------------------------
 // INIT
@@ -222,4 +224,4 @@ if (lastQuote) {
 }
 
 // Periodic server sync every 60 seconds
-setInterval(syncWithServer, 60000);
+setInterval(syncQuotes, 60000);
