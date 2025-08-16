@@ -1,8 +1,12 @@
 // -------------------------
-// QUOTES STORAGE + INIT
+// GLOBAL VARIABLES
 // -------------------------
 let quotes = [];
+const SERVER_URL = "https://jsonplaceholder.typicode.com/posts";
 
+// -------------------------
+// LOCAL STORAGE FUNCTIONS
+// -------------------------
 function loadQuotes() {
   const storedQuotes = localStorage.getItem("quotes");
   if (storedQuotes) {
@@ -22,60 +26,56 @@ function saveQuotes() {
 }
 
 // -------------------------
-// POPULATE CATEGORIES
+// CATEGORY FILTERING
 // -------------------------
 function populateCategories() {
   const categoryFilter = document.getElementById("categoryFilter");
-  categoryFilter.innerHTML = ""; // clear old options
-
   const categories = ["all", ...new Set(quotes.map(q => q.category))];
 
-  categories.forEach(cat => {
-    const option = document.createElement("option");
-    option.value = cat;
-    option.textContent = cat;
-    categoryFilter.appendChild(option); // <-- appendChild used here
-  });
+  categoryFilter.innerHTML = categories
+    .map(cat => `<option value="${cat}">${cat}</option>`)
+    .join("");
 
+  // Restore last selected category
   const savedCategory = localStorage.getItem("selectedCategory") || "all";
   categoryFilter.value = savedCategory;
+
+  // Display a quote based on saved filter
+  filterQuotes();
 }
 
+function filterQuotes() {
+  const category = document.getElementById("categoryFilter").value;
+  localStorage.setItem("selectedCategory", category);
+  showRandomQuote();
+}
 
 // -------------------------
-// DISPLAY RANDOM QUOTE (WITH FILTERING)
-// New
-function showRandomQuote() { 
+// DISPLAY RANDOM QUOTE
+// -------------------------
+function showRandomQuote() {
   const category = document.getElementById("categoryFilter").value;
   let filteredQuotes = category === "all" ? quotes : quotes.filter(q => q.category === category);
+
   if (filteredQuotes.length === 0) {
     document.getElementById("quoteDisplay").innerHTML = `<p>No quotes found for "${category}"</p>`;
     return;
   }
+
   const randomIndex = Math.floor(Math.random() * filteredQuotes.length);
   const quote = filteredQuotes[randomIndex];
+
   document.getElementById("quoteDisplay").innerHTML = `
     <p>"${quote.text}"</p>
     <small>- ${quote.category}</small>
   `;
+
   sessionStorage.setItem("lastQuote", JSON.stringify(quote));
 }
 
-
 // -------------------------
-// FILTER QUOTES
+// ADD NEW QUOTE
 // -------------------------
-function filterQuotes() {
-  const category = document.getElementById("categoryFilter").value;
-  localStorage.setItem("selectedCategory", category);
-  displayRandomQuote();
-}
-
-// -------------------------
-// ADD QUOTE
-// -------------------------
-
-// New
 function createAddQuoteForm() {
   const textInput = document.getElementById("newQuoteText").value.trim();
   const categoryInput = document.getElementById("newQuoteCategory").value.trim();
@@ -83,18 +83,18 @@ function createAddQuoteForm() {
   if (textInput && categoryInput) {
     quotes.push({ text: textInput, category: categoryInput });
     saveQuotes();
-    populateCategories(); // update dropdown if new category added
-    showRandomQuote();    // display the new quote
+    populateCategories(); // update dropdown if new category
+    showRandomQuote();
     document.getElementById("newQuoteText").value = "";
     document.getElementById("newQuoteCategory").value = "";
-    alert("Quote added!");
+    notifyUser("Quote added successfully!");
   } else {
     alert("Please enter both a quote and a category.");
   }
 }
 
 // -------------------------
-// EXPORT TO JSON
+// JSON IMPORT / EXPORT
 // -------------------------
 function exportToJsonFile() {
   const blob = new Blob([JSON.stringify(quotes, null, 2)], { type: "application/json" });
@@ -106,9 +106,6 @@ function exportToJsonFile() {
   URL.revokeObjectURL(url);
 }
 
-// -------------------------
-// IMPORT FROM JSON FILE
-// -------------------------
 function importFromJsonFile(event) {
   const fileReader = new FileReader();
   fileReader.onload = function (event) {
@@ -118,8 +115,8 @@ function importFromJsonFile(event) {
         quotes.push(...importedQuotes);
         saveQuotes();
         populateCategories();
-        alert("Quotes imported successfully!");
-        displayRandomQuote();
+        notifyUser("Quotes imported successfully!");
+        showRandomQuote();
       } else {
         alert("Invalid JSON format. Must be an array of quotes.");
       }
@@ -131,6 +128,47 @@ function importFromJsonFile(event) {
 }
 
 // -------------------------
+// SERVER SYNC + CONFLICT RESOLUTION
+// -------------------------
+async function fetchServerQuotes() {
+  try {
+    const response = await fetch(SERVER_URL);
+    const serverData = await response.json();
+    return serverData.map(item => ({ text: item.title, category: "Server" }));
+  } catch (error) {
+    console.error("Error fetching server data:", error);
+    return [];
+  }
+}
+
+async function syncWithServer() {
+  const serverQuotes = await fetchServerQuotes();
+  let updated = false;
+
+  serverQuotes.forEach(serverQuote => {
+    const exists = quotes.some(q => q.text === serverQuote.text);
+    if (!exists) {
+      quotes.push(serverQuote);
+      updated = true;
+    }
+  });
+
+  if (updated) {
+    saveQuotes();
+    populateCategories();
+    showRandomQuote();
+    notifyUser("Quotes updated from server!");
+  }
+}
+
+// -------------------------
+// NOTIFICATION
+// -------------------------
+function notifyUser(message) {
+  alert(message); // can replace with toast later
+}
+
+// -------------------------
 // EVENT LISTENERS
 // -------------------------
 document.getElementById("newQuote").addEventListener("click", showRandomQuote);
@@ -138,6 +176,7 @@ document.getElementById("addQuoteBtn").addEventListener("click", createAddQuoteF
 document.getElementById("exportBtn").addEventListener("click", exportToJsonFile);
 document.getElementById("importFile").addEventListener("change", importFromJsonFile);
 document.getElementById("categoryFilter").addEventListener("change", filterQuotes);
+document.getElementById("syncBtn")?.addEventListener("click", syncWithServer);
 
 // -------------------------
 // INIT
@@ -145,6 +184,16 @@ document.getElementById("categoryFilter").addEventListener("change", filterQuote
 loadQuotes();
 populateCategories();
 
-// Restore last selected category and filter immediately
-filterQuotes();
+const lastQuote = sessionStorage.getItem("lastQuote");
+if (lastQuote) {
+  const quote = JSON.parse(lastQuote);
+  document.getElementById("quoteDisplay").innerHTML = `
+    <p>"${quote.text}"</p>
+    <small>- ${quote.category}</small>
+  `;
+} else {
+  showRandomQuote();
+}
 
+// Periodic server sync every 60 seconds
+setInterval(syncWithServer, 60000);
