@@ -130,7 +130,9 @@ function importFromJsonFile(event) {
 // -------------------------
 // SERVER SYNC + CONFLICT RESOLUTION
 // -------------------------
-async function fetchServerQuotes() {
+
+// New
+async function fetchQuotesFromServer() {
   try {
     const response = await fetch(SERVER_URL);
     const serverData = await response.json();
