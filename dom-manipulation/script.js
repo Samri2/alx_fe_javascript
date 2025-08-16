@@ -74,15 +74,17 @@ function filterQuotes() {
 // -------------------------
 // ADD QUOTE
 // -------------------------
-function addQuote() {
+
+// New
+function createAddQuoteForm() {
   const textInput = document.getElementById("newQuoteText").value.trim();
   const categoryInput = document.getElementById("newQuoteCategory").value.trim();
 
   if (textInput && categoryInput) {
     quotes.push({ text: textInput, category: categoryInput });
     saveQuotes();
-    populateCategories(); // update dropdown if new category introduced
-    displayRandomQuote();
+    populateCategories(); // update dropdown if new category added
+    showRandomQuote();    // display the new quote
     document.getElementById("newQuoteText").value = "";
     document.getElementById("newQuoteCategory").value = "";
     alert("Quote added!");
@@ -132,7 +134,7 @@ function importFromJsonFile(event) {
 // EVENT LISTENERS
 // -------------------------
 document.getElementById("newQuote").addEventListener("click", showRandomQuote);
-document.getElementById("addQuoteBtn").addEventListener("click", addQuote);
+document.getElementById("addQuoteBtn").addEventListener("click", createAddQuoteForm);
 document.getElementById("exportBtn").addEventListener("click", exportToJsonFile);
 document.getElementById("importFile").addEventListener("change", importFromJsonFile);
 document.getElementById("categoryFilter").addEventListener("change", filterQuotes);
