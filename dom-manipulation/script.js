@@ -141,13 +141,6 @@ document.getElementById("categoryFilter").addEventListener("change", filterQuote
 loadQuotes();
 populateCategories();
 
-const lastQuote = sessionStorage.getItem("lastQuote");
-if (lastQuote) {
-  const quote = JSON.parse(lastQuote);
-  document.getElementById("quoteDisplay").innerHTML = `
-    <p>"${quote.text}"</p>
-    <small>- ${quote.category}</small>
-  `;
-} else {
-  displayRandomQuote();
-}
+// Restore last selected category and filter immediately
+filterQuotes();
+
