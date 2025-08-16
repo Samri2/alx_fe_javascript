@@ -44,26 +44,23 @@ function populateCategories() {
 
 // -------------------------
 // DISPLAY RANDOM QUOTE (WITH FILTERING)
-// -------------------------
-function displayRandomQuote() {
+// New
+function showRandomQuote() { 
   const category = document.getElementById("categoryFilter").value;
   let filteredQuotes = category === "all" ? quotes : quotes.filter(q => q.category === category);
-
   if (filteredQuotes.length === 0) {
     document.getElementById("quoteDisplay").innerHTML = `<p>No quotes found for "${category}"</p>`;
     return;
   }
-
   const randomIndex = Math.floor(Math.random() * filteredQuotes.length);
   const quote = filteredQuotes[randomIndex];
   document.getElementById("quoteDisplay").innerHTML = `
     <p>"${quote.text}"</p>
     <small>- ${quote.category}</small>
   `;
-
-  // Save last viewed quote for session
   sessionStorage.setItem("lastQuote", JSON.stringify(quote));
 }
+
 
 // -------------------------
 // FILTER QUOTES
@@ -134,7 +131,7 @@ function importFromJsonFile(event) {
 // -------------------------
 // EVENT LISTENERS
 // -------------------------
-document.getElementById("newQuote").addEventListener("click", displayRandomQuote);
+document.getElementById("newQuote").addEventListener("click", showRandomQuote);
 document.getElementById("addQuoteBtn").addEventListener("click", addQuote);
 document.getElementById("exportBtn").addEventListener("click", exportToJsonFile);
 document.getElementById("importFile").addEventListener("change", importFromJsonFile);
