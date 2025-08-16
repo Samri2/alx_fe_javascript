@@ -36,12 +36,10 @@ function populateCategories() {
     .map(cat => `<option value="${cat}">${cat}</option>`)
     .join("");
 
-  // Restore last selected category
   const savedCategory = localStorage.getItem("selectedCategory") || "all";
   categoryFilter.value = savedCategory;
 
-  // Display a quote based on saved filter
-  filterQuotes();
+  filterQuotes(); // display quotes based on saved filter
 }
 
 function filterQuotes() {
@@ -81,10 +79,15 @@ function createAddQuoteForm() {
   const categoryInput = document.getElementById("newQuoteCategory").value.trim();
 
   if (textInput && categoryInput) {
-    quotes.push({ text: textInput, category: categoryInput });
+    const newQuote = { text: textInput, category: categoryInput };
+
+    quotes.push(newQuote);
     saveQuotes();
-    populateCategories(); // update dropdown if new category
+    populateCategories();
     showRandomQuote();
+
+    postQuoteToServer(newQuote); // send new quote to server
+
     document.getElementById("newQuoteText").value = "";
     document.getElementById("newQuoteCategory").value = "";
     notifyUser("Quote added successfully!");
@@ -130,8 +133,6 @@ function importFromJsonFile(event) {
 // -------------------------
 // SERVER SYNC + CONFLICT RESOLUTION
 // -------------------------
-
-// New
 async function fetchQuotesFromServer() {
   try {
     const response = await fetch(SERVER_URL);
@@ -144,7 +145,7 @@ async function fetchQuotesFromServer() {
 }
 
 async function syncWithServer() {
-  const serverQuotes = await fetchServerQuotes();
+  const serverQuotes = await fetchQuotesFromServer();
   let updated = false;
 
   serverQuotes.forEach(serverQuote => {
@@ -164,10 +165,33 @@ async function syncWithServer() {
 }
 
 // -------------------------
-// NOTIFICATION
+// POST NEW QUOTE TO SERVER
+// -------------------------
+async function postQuoteToServer(quote) {
+  try {
+    const response = await fetch(SERVER_URL, {
+      method: "POST",
+      headers: {
+        "Content-Type": "application/json"
+      },
+      body: JSON.stringify(quote)
+    });
+
+    if (!response.ok) throw new Error("Failed to post quote");
+
+    const data = await response.json();
+    console.log("Quote posted to server:", data);
+    notifyUser("Quote synced to server!");
+  } catch (error) {
+    console.error("Error posting quote:", error);
+  }
+}
+
+// -------------------------
+// NOTIFICATIONS
 // -------------------------
 function notifyUser(message) {
-  alert(message); // can replace with toast later
+  alert(message); // can replace with toast notifications later
 }
 
 // -------------------------
