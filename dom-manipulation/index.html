@@ -3,23 +3,25 @@
 <head>
   <meta charset="UTF-8">
   <meta name="viewport" content="width=device-width, initial-scale=1.0">
+    <link rel="stylesheet" href="css.css">
   <title>Dynamic Quote Generator</title>
 </head>
 <body>
   <h1>Dynamic Quote Generator</h1>
 
-  <!-- Quote Display -->
-  <div id="quoteDisplay"></div>
-
   <!-- Category Filter -->
-  <select id="categoryFilter" onchange="filterQuotes()">
+  <label for="categoryFilter">Choose category:</label>
+  <select id="categoryFilter">
     <option value="all">All Categories</option>
   </select>
 
-  <!-- Show New Quote Button -->
+  <!-- Quote Display -->
+  <div id="quoteDisplay"></div>
+
+  <!-- Show Random Quote Button -->
   <button id="newQuote">Show New Quote</button>
 
-  <!-- Add New Quote Form -->
+  <!-- Add New Quote -->
   <div>
     <input id="newQuoteText" type="text" placeholder="Enter a new quote" />
     <input id="newQuoteCategory" type="text" placeholder="Enter quote category" />
