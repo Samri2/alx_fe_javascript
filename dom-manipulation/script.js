@@ -1,75 +1,53 @@
-// Initial Quotes Array (could be fetched from JSON)
-let quotes = [
-    { text: "The best way to get started is to quit talking and begin doing.", author: "Walt Disney", category: "Motivation" },
-    { text: "Life is what happens when you're busy making other plans.", author: "John Lennon", category: "Life" },
-    { text: "Do one thing every day that scares you.", author: "Eleanor Roosevelt", category: "Courage" }
+// Array of quotes with categories
+const quotes = [
+  { text: "C is fun", category: "Programming" },
+  { text: "Python is cool", category: "Programming" },
+  { text: "JavaScript is amazing", category: "Programming" },
+  { text: "Stay positive!", category: "Motivation" },
+  { text: "Never give up!", category: "Motivation" }
 ];
 
-// Load saved quotes from localStorage
-if (localStorage.getItem('quotes')) {
-    quotes = JSON.parse(localStorage.getItem('quotes'));
-}
+// Get DOM element to display quotes
+const quoteDisplay = document.getElementById("quoteDisplay");
+const categoryFilter = document.getElementById("categoryFilter");
 
-// Load last selected category
-let lastCategory = localStorage.getItem('lastCategory') || 'all';
-
-// DOM Elements
-const quoteContainer = document.getElementById('quoteContainer');
-const categoryFilter = document.getElementById('categoryFilter');
-const addQuoteForm = document.getElementById('addQuoteForm');
-
-// Display Quotes
-function displayQuotes(filteredQuotes) {
-    quoteContainer.innerHTML = '';
-    filteredQuotes.forEach(q => {
-        const div = document.createElement('div');
-        div.innerHTML = `<p>"${q.text}" - <strong>${q.author}</strong> [${q.category}]</p>`;
-        quoteContainer.appendChild(div);
-    });
-}
-
-// Populate Categories
+// Populate category dropdown dynamically
 function populateCategories() {
-    const categories = [...new Set(quotes.map(q => q.category))];
-    categoryFilter.innerHTML = `<option value="all">All Categories</option>`;
-    categories.forEach(cat => {
-        const option = document.createElement('option');
-        option.value = cat;
-        option.textContent = cat;
-        categoryFilter.appendChild(option);
-    });
-    categoryFilter.value = lastCategory;
+  const categories = [...new Set(quotes.map(q => q.category))];
+  categoryFilter.innerHTML = '<option value="all">All Categories</option>';
+  categories.forEach(cat => {
+    const option = document.createElement("option");
+    option.value = cat;
+    option.textContent = cat;
+    categoryFilter.appendChild(option);
+  });
 }
 
-// Filter Quotes
+// Filter quotes based on selected category and display a random one
 function filterQuotes() {
-    const selected = categoryFilter.value;
-    lastCategory = selected;
-    localStorage.setItem('lastCategory', selected);
+  const selectedCategory = categoryFilter.value;
+  localStorage.setItem("selectedCategory", selectedCategory);
 
-    if (selected === 'all') {
-        displayQuotes(quotes);
-    } else {
-        displayQuotes(quotes.filter(q => q.category === selected));
-    }
+  const filteredQuotes = selectedCategory === "all" 
+    ? quotes 
+    : quotes.filter(q => q.category === selectedCategory);
+
+  if (filteredQuotes.length === 0) {
+    quoteDisplay.textContent = "No quotes available for this category.";
+    return;
+  }
+
+  const randomQuote = filteredQuotes[Math.floor(Math.random() * filteredQuotes.length)];
+  quoteDisplay.textContent = randomQuote.text;
 }
 
-// Add New Quote
-addQuoteForm.addEventListener('submit', (e) => {
-    e.preventDefault();
-    const newQuote = {
-        text: document.getElementById('quoteText').value,
-        author: document.getElementById('quoteAuthor').value,
-        category: document.getElementById('quoteCategory').value
-    };
-    quotes.push(newQuote);
-    localStorage.setItem('quotes', JSON.stringify(quotes));
-    populateCategories();
-    filterQuotes();
+// On page load, populate categories, restore last selected category, and show a quote
+window.onload = () => {
+  populateCategories();
+  const savedCategory = localStorage.getItem("selectedCategory") || "all";
+  categoryFilter.value = savedCategory;
+  filterQuotes();
+};
 
-    addQuoteForm.reset();
-});
-
-// Initial Population
-populateCategories();
-filterQuotes();
+// Attach event listener to filter dropdown
+categoryFilter.addEventListener("change", filterQuotes);
